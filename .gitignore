@@ -1,1 +1,15 @@
 *.jack
+*.vscode
+a.out
+jackc
+jack
+lexer.c
+lexer.h.*
+lexer.h
+myparser
+par
+parser
+parser.h.gch
+ParserGrader.c
+run_autograder
+setup.sh
