@@ -15,6 +15,7 @@ ParserInfo whileStatement();
 ParserInfo doStatement();
 ParserInfo returnStatement();
 ParserInfo expression();
+ParserInfo subroutineCall();
 
 ParserInfo type()
 {
@@ -186,7 +187,7 @@ ParserInfo paramList()
 
 ParserInfo subroutineBody()
 {
-	printf("\n hello from paramList");
+	printf("\n hello from subroutineBody");
 	ParserInfo pi;
 	pi.er = none;
 	pi.tk = GetNextToken();
@@ -329,6 +330,131 @@ ParserInfo letStatement()
 		return pi;
 	}
 	pi = expression();
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, ";") == 0)
+		;
+	else
+	{
+		pi.er = semicolonExpected;
+		return pi;
+	}
+	return pi;
+}
+
+ParserInfo ifStatement()
+{
+	printf("\n hello from ifStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "(") == 0)
+		;
+	else
+	{
+		pi.er = openParenExpected;
+		return pi;
+	}
+	pi = expression();
+	if (pi.er != none)
+		return pi;
+	if (strcmp(pi.tk.lx, ")") == 0)
+		;
+	else
+	{
+		pi.er = closeParenExpected;
+		return pi;
+	}
+	pi = subroutineBody();
+	if (pi.er != none)
+		return pi;
+	pi.tk = PeekNextToken();
+	while (1)
+	{
+		if (strcmp(pi.tk.lx, "else") != 0)
+			break;
+		pi = subroutineBody();
+		if (pi.er != none)
+			return pi;
+		break;
+	}
+	return pi;
+}
+
+ParserInfo whileStatement()
+{
+	printf("\n hello from whileStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "(") == 0)
+		;
+	else
+	{
+		pi.er = openParenExpected;
+		return pi;
+	}
+	pi = expression();
+	if (pi.er != none)
+		return pi;
+	if (strcmp(pi.tk.lx, ")") == 0)
+		;
+	else
+	{
+		pi.er = closeParenExpected;
+		return pi;
+	}
+	pi = subroutineBody();
+	return pi;
+}
+
+ParserInfo doStatement()
+{
+	printf("\n hello from doStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi = subroutineCall();
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, ";") == 0)
+		;
+	else
+	{
+		pi.er = semicolonExpected;
+		return pi;
+	}
+	return pi;
+}
+
+ParserInfo returnStatement()
+{
+	printf("\n hello from returnStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi.tk = PeekNextToken();
+	while (1)
+	{
+		if (strcmp(pi.tk.lx, ";") == 0)
+			break;
+		pi = expression();
+		if (pi.er != none)
+			return pi;
+		break;
+	}
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, ";") == 0)
+		;
+	else
+	{
+		pi.er = semicolonExpected;
+		return pi;
+	}
 	return pi;
 }
 
