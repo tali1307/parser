@@ -14,6 +14,7 @@ ParserInfo ifStatement();
 ParserInfo whileStatement();
 ParserInfo doStatement();
 ParserInfo returnStatement();
+ParserInfo expression();
 
 ParserInfo type()
 {
@@ -240,6 +241,94 @@ ParserInfo statement()
 		pi.er = syntaxError;
 		return pi;
 	}
+	return pi;
+}
+
+ParserInfo varDeclarStatement()
+{
+	printf("\n hello from varDeclarStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi = type();
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (pi.tk.tp == ID)
+		;
+	else
+	{
+		pi.er = idExpected;
+		return pi;
+	}
+	pi.tk = PeekNextToken();
+	while (1)
+	{
+		if (strcmp(pi.tk.lx, ",") != 0)
+			break;
+		pi.tk = GetNextToken();
+		pi.tk = GetNextToken();
+		if (pi.tk.tp == ID)
+			;
+		else
+		{
+			pi.er = idExpected;
+			return pi;
+		}
+		pi.tk = PeekNextToken();
+	}
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, ";") == 0)
+		;
+	else
+	{
+		pi.er = semicolonExpected;
+		return pi;
+	}
+	return pi;
+}
+
+ParserInfo letStatement()
+{
+	printf("\n hello from letStatement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	pi.tk = GetNextToken();
+	if (pi.tk.tp == ID)
+		;
+	else
+	{
+		pi.er = idExpected;
+		return pi;
+	}
+	pi.tk = PeekNextToken();
+	while (1)
+	{
+		if (strcmp(pi.tk.lx, "[") != 0)
+			break;
+		pi = expression();
+		if (pi.er != none)
+			return pi;
+		pi.tk = GetNextToken();
+		if (strcmp(pi.tk.lx, "]") == 0)
+			;
+		else
+		{
+			pi.er = closeBraceExpected;
+			return pi;
+		}
+		break;
+	}
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "=") == 0)
+		;
+	else
+	{
+		pi.er = equalExpected;
+		return pi;
+	}
+	pi = expression();
 	return pi;
 }
 
