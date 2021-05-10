@@ -5,6 +5,16 @@
 #include "lexer.h"
 #include "parser.h"
 
+ParserInfo subroutineBody();
+ParserInfo paramList();
+ParserInfo statement();
+ParserInfo varDeclarStatement();
+ParserInfo letStatement();
+ParserInfo ifStatement();
+ParserInfo whileStatement();
+ParserInfo doStatement();
+ParserInfo returnStatement();
+
 ParserInfo type()
 {
 	ParserInfo pi;
@@ -70,7 +80,167 @@ ParserInfo classVarDeclar()
 
 ParserInfo subroutineDeclar()
 {
-	;
+	printf("\n hello from subroutinedeclar");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "constructor") == 0 || strcmp(pi.tk.lx, "method") == 0 || strcmp(pi.tk.lx, "function") == 0)
+		;
+	else
+	{
+		pi.er = subroutineDeclarErr;
+		return pi;
+	}
+	pi.tk = PeekNextToken();
+	if (strcmp(pi.tk.lx, "char") == 0 || strcmp(pi.tk.lx, "int") == 0 || strcmp(pi.tk.lx, "boolean") == 0 || pi.tk.tp == ID)
+		type();
+	else if (strcmp(pi.tk.lx, "void") == 0)
+		;
+	else
+	{
+		pi.er = syntaxError;
+		return pi;
+	}
+	pi.tk = GetNextToken();
+	pi.tk = GetNextToken();
+	if (pi.tk.tp == ID)
+		;
+	else
+	{
+		pi.er = idExpected;
+		return pi;
+	}
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "(") == 0)
+		;
+	else
+	{
+		pi.er = openParenExpected;
+		return pi;
+	}
+	pi = paramList();
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, ")") == 0)
+		;
+	else
+	{
+		pi.er = closeParenExpected;
+		return pi;
+	}
+	pi = subroutineBody();
+	return pi;
+}
+
+ParserInfo paramList()
+{
+	printf("\n hello from paramList");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = PeekNextToken();
+	if (strcmp(pi.tk.lx, "char") == 0 || strcmp(pi.tk.lx, "int") == 0 || strcmp(pi.tk.lx, "boolean") == 0 || pi.tk.tp == ID)
+	{
+		pi = type();
+		if (pi.er != none)
+			return pi;
+		pi.tk = GetNextToken();
+		if (pi.tk.tp == ID)
+			;
+		else
+		{
+			pi.er = idExpected;
+			return pi;
+		}
+		pi.tk = PeekNextToken();
+		while (1)
+		{
+			if (strcmp(pi.tk.lx, ",") != 0)
+				break;
+			pi.tk = GetNextToken();
+			pi = type();
+			if (pi.er != none)
+				return pi;
+			pi.tk = GetNextToken();
+			if (pi.tk.tp == ID)
+				;
+			else
+			{
+				pi.er = idExpected;
+				return pi;
+			}
+			pi.tk = PeekNextToken();
+		}
+		return pi;
+	}
+	else if (strcmp(pi.tk.lx, ")") == 0)
+		;
+	else
+	{
+		pi.er = syntaxError;
+		return pi;
+	}
+	return pi;
+}
+
+ParserInfo subroutineBody()
+{
+	printf("\n hello from paramList");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "{") == 0)
+		;
+	else
+	{
+		pi.er = openBraceExpected;
+		return pi;
+	}
+	while (1)
+	{
+		pi = statement(); // multiple recurrences??
+		if (pi.er != none)
+			break;
+		if (strcmp(PeekNextToken().lx, "}") == 0)
+			break;
+	}
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "}") == 0)
+		;
+	else
+	{
+		pi.er = closeBraceExpected;
+		return pi;
+	}
+	return pi;
+}
+
+ParserInfo statement()
+{
+	printf("\n hello from statement");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = PeekNextToken();
+	if (strcmp(pi.tk.lx, "var") == 0)
+		pi = varDeclarStatement();
+	else if (strcmp(pi.tk.lx, "let") == 0)
+		pi = letStatement();
+	else if (strcmp(pi.tk.lx, "if") == 0)
+		pi = ifStatement();
+	else if (strcmp(pi.tk.lx, "while") == 0)
+		pi = whileStatement();
+	else if (strcmp(pi.tk.lx, "do") == 0)
+		pi = doStatement();
+	else if (strcmp(pi.tk.lx, "return") == 0)
+		pi = returnStatement();
+	else
+	{
+		pi.er = syntaxError;
+		return pi;
+	}
+	return pi;
 }
 
 ParserInfo memberDeclar()
@@ -80,9 +250,9 @@ ParserInfo memberDeclar()
 	pi.er = none;
 	pi.tk = PeekNextToken();
 	if (strcmp(pi.tk.lx, "static") == 0 || strcmp(pi.tk.lx, "field") == 0)
-		classVarDeclar();
+		pi = classVarDeclar();
 	else if (strcmp(pi.tk.lx, "constructor") == 0 || strcmp(pi.tk.lx, "method") == 0 || strcmp(pi.tk.lx, "function") == 0)
-		subroutineDeclar();
+		pi = subroutineDeclar();
 	else
 		pi.er = memberDeclarErr;
 	return pi;
@@ -117,7 +287,14 @@ ParserInfo classDeclar()
 		pi.er = openBraceExpected;
 		return pi;
 	}
-	pi = memberDeclar();
+	while (1)
+	{
+		pi = memberDeclar(); // multiple recurrences??
+		if (pi.er != none)
+			break;
+		if (strcmp(PeekNextToken().lx, "}") == 0)
+			break;
+	}
 	if (pi.er != none)
 		return pi;
 	pi.tk = GetNextToken();
