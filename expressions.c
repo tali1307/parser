@@ -1,10 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include "lexer.h"
-#include "parser.h"
-
 ParserInfo expressionList()
 {
     printf("\n hello from expressionList");
