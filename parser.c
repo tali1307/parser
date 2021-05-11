@@ -645,7 +645,9 @@ ParserInfo factor()
 	printf("\n hello from factor");
 	ParserInfo pi;
 	pi.er = none;
+	printf("\ntoken here13 %s", pi.tk.lx);
 	pi.tk = PeekNextToken();
+	printf("\ntoken here14 %s", pi.tk.lx);
 	if (strcmp(pi.tk.lx, "-") == 0 || strcmp(pi.tk.lx, "~") == 0 || pi.tk.tp == INT || pi.tk.tp == STRING || pi.tk.tp == ID || strcmp(pi.tk.lx, "true") == 0 || strcmp(pi.tk.lx, "false") == 0 || strcmp(pi.tk.lx, "null") == 0 || strcmp(pi.tk.lx, "this") == 0 || strcmp(pi.tk.lx, "(") == 0)
 		pi = operand();
 	else
@@ -661,7 +663,10 @@ ParserInfo operand()
 	printf("\n hello from operand");
 	ParserInfo pi;
 	pi.er = none;
+	printf("\ntoken here15 %s", pi.tk.lx);
 	pi.tk = PeekNextToken();
+	printf("\ntoken here16 %s", pi.tk.lx);
+	printf("\nare we here1 %s", pi.tk.lx);
 	if (pi.tk.tp == INT || pi.tk.tp == STRING || strcmp(pi.tk.lx, "true") == 0 || strcmp(pi.tk.lx, "false") == 0 || strcmp(pi.tk.lx, "null") == 0 || strcmp(pi.tk.lx, "this") == 0)
 		;
 	else if (strcmp(pi.tk.lx, "(") == 0)
@@ -681,12 +686,19 @@ ParserInfo operand()
 	}
 	else if (pi.tk.tp == ID)
 	{
+		printf("\ntoken here??6 %s", pi.tk.lx);
 		pi.tk = GetNextToken();
+		Token tk = GetNextToken();
+		printf("\ntoken here??7 %s", pi.tk.lx);
+		printf("\ntoken here??8 %s", pi.tk.lx);
 		while (1)
 		{
-			if (strcmp(pi.tk.lx, ".") != 0)
+			if (strcmp(tk, ".") != 0)
 				break;
+			printf("\nare we here2 %s", pi.tk.lx);
 			pi.tk = GetNextToken();
+			pi.tk = GetNextToken();
+			printf("\nare we here3 %s", pi.tk.lx);
 			if (pi.tk.tp == ID)
 				;
 			else
@@ -696,11 +708,14 @@ ParserInfo operand()
 			}
 			break;
 		}
-		pi.tk = GetNextToken();
+		printf("\ntoken here??9 %s", pi.tk.lx);
+		tk = PeekNextToken();
+		printf("\ntoken here??10 %s", pi.tk.lx);
 		while (1)
 		{
 			if (strcmp(pi.tk.lx, "[") != 0 && strcmp(pi.tk.lx, "(") != 0)
 				break;
+			printf("\ntoken here??11 %s", pi.tk.lx);
 			pi.tk = GetNextToken();
 			if (strcmp(pi.tk.lx, "[") == 0)
 			{
@@ -719,10 +734,13 @@ ParserInfo operand()
 			}
 			else if (strcmp(pi.tk.lx, "(") == 0)
 			{
+				printf("\ntoken here4 %s", pi.tk.lx);
 				pi = expressionList();
+				printf("\ntoken here12 %s", pi.tk.lx);
 				if (pi.er != none)
 					return pi;
 				pi.tk = GetNextToken();
+				printf("\ntoken here5 %s", pi.tk.lx);
 				if (strcmp(pi.tk.lx, ")") == 0)
 					;
 				else
@@ -733,142 +751,143 @@ ParserInfo operand()
 				break;
 			}
 		}
-		else
-		{
-			pi.er = syntaxError;
-			return pi;
-		}
+	}
+	else
+	{
+		pi.er = syntaxError;
 		return pi;
 	}
+	return pi;
+}
 
-	// put expressions back here
+// put expressions back here
 
-	ParserInfo memberDeclar()
+ParserInfo memberDeclar()
+{
+	printf("\n hello from memberdeclar");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = PeekNextToken();
+	if (strcmp(pi.tk.lx, "static") == 0 || strcmp(pi.tk.lx, "field") == 0)
+		pi = classVarDeclar();
+	else if (strcmp(pi.tk.lx, "constructor") == 0 || strcmp(pi.tk.lx, "method") == 0 || strcmp(pi.tk.lx, "function") == 0)
+		pi = subroutineDeclar();
+	else
+		pi.er = memberDeclarErr;
+	return pi;
+}
+
+ParserInfo classDeclar()
+{
+	printf("\n hello from classdeclar");
+	ParserInfo pi;
+	pi.er = none;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "class") == 0)
+		;
+	else
 	{
-		printf("\n hello from memberdeclar");
-		ParserInfo pi;
-		pi.er = none;
-		pi.tk = PeekNextToken();
-		if (strcmp(pi.tk.lx, "static") == 0 || strcmp(pi.tk.lx, "field") == 0)
-			pi = classVarDeclar();
-		else if (strcmp(pi.tk.lx, "constructor") == 0 || strcmp(pi.tk.lx, "method") == 0 || strcmp(pi.tk.lx, "function") == 0)
-			pi = subroutineDeclar();
-		else
-			pi.er = memberDeclarErr;
+		pi.er = classExpected;
 		return pi;
 	}
-
-	ParserInfo classDeclar()
+	pi.tk = GetNextToken();
+	if (pi.tk.tp == ID)
+		;
+	else
 	{
-		printf("\n hello from classdeclar");
-		ParserInfo pi;
-		pi.er = none;
-		pi.tk = GetNextToken();
-		if (strcmp(pi.tk.lx, "class") == 0)
-			;
-		else
-		{
-			pi.er = classExpected;
-			return pi;
-		}
-		pi.tk = GetNextToken();
-		if (pi.tk.tp == ID)
-			;
-		else
-		{
-			pi.er = idExpected;
-			return pi;
-		}
-		pi.tk = GetNextToken();
-		if (strcmp(pi.tk.lx, "{") == 0)
-			;
-		else
-		{
-			pi.er = openBraceExpected;
-			return pi;
-		}
-		while (1)
-		{
-			pi = memberDeclar(); // multiple recurrences??
-			if (pi.er != none)
-				break;
-			if (strcmp(PeekNextToken().lx, "}") == 0)
-				break;
-		}
+		pi.er = idExpected;
+		return pi;
+	}
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "{") == 0)
+		;
+	else
+	{
+		pi.er = openBraceExpected;
+		return pi;
+	}
+	while (1)
+	{
+		pi = memberDeclar(); // multiple recurrences??
 		if (pi.er != none)
-			return pi;
-		pi.tk = GetNextToken();
-		if (strcmp(pi.tk.lx, "}") == 0)
-			;
-		else
-		{
-			pi.er = closeBraceExpected;
-			return pi;
-		}
+			break;
+		if (strcmp(PeekNextToken().lx, "}") == 0)
+			break;
+	}
+	if (pi.er != none)
+		return pi;
+	pi.tk = GetNextToken();
+	if (strcmp(pi.tk.lx, "}") == 0)
+		;
+	else
+	{
+		pi.er = closeBraceExpected;
 		return pi;
 	}
+	return pi;
+}
 
-	int InitParser(char *file_name)
-	{
-		InitLexer(file_name);
-		return 1;
-	}
+int InitParser(char *file_name)
+{
+	InitLexer(file_name);
+	return 1;
+}
 
-	ParserInfo Parse()
-	{
-		ParserInfo pi;
-		pi.er = none;
-		pi = classDeclar();
-		return pi;
-	}
+ParserInfo Parse()
+{
+	ParserInfo pi;
+	pi.er = none;
+	pi = classDeclar();
+	return pi;
+}
 
-	int StopParser()
-	{
-		StopLexer();
-		return 1;
-	}
+int StopParser()
+{
+	StopLexer();
+	return 1;
+}
 
 #ifndef TEST_PARSER
-	int main()
-	{
-		InitParser("Main.jack");
-		ParserInfo pi;
-		pi = Parse();
-		StopParser();
-		printf("\n token lexeme: %s, line no: %d and pi error: ", pi.tk.lx, pi.tk.ln);
-		if (pi.er == 0)
-			printf("none");
-		if (pi.er == 1)
-			printf("lexerErr");
-		if (pi.er == 2)
-			printf("classExpected");
-		if (pi.er == 3)
-			printf("idExpected");
-		if (pi.er == 4)
-			printf("openBraceExpected");
-		if (pi.er == 5)
-			printf("closeBraceExpected");
-		if (pi.er == 6)
-			printf("memberDeclarErr");
-		if (pi.er == 7)
-			printf("classVarErr");
-		if (pi.er == 8)
-			printf("illegalType");
-		if (pi.er == 9)
-			printf("semicolonExpected");
-		if (pi.er == 10)
-			printf("subroutineDeclarErr");
-		if (pi.er == 11)
-			printf("openParenExpected");
-		if (pi.er == 12)
-			printf("closeParenExpected");
-		if (pi.er == 13)
-			printf("closeBracketExpected");
-		if (pi.er == 14)
-			printf("equalExpected");
-		if (pi.er == 15)
-			printf("syntaxError");
-		printf("\n\n\n");
-		return 1;
-	}
+int main()
+{
+	InitParser("Main.jack");
+	ParserInfo pi;
+	pi = Parse();
+	StopParser();
+	printf("\n token lexeme: %s, line no: %d and pi error: ", pi.tk.lx, pi.tk.ln);
+	if (pi.er == 0)
+		printf("none");
+	if (pi.er == 1)
+		printf("lexerErr");
+	if (pi.er == 2)
+		printf("classExpected");
+	if (pi.er == 3)
+		printf("idExpected");
+	if (pi.er == 4)
+		printf("openBraceExpected");
+	if (pi.er == 5)
+		printf("closeBraceExpected");
+	if (pi.er == 6)
+		printf("memberDeclarErr");
+	if (pi.er == 7)
+		printf("classVarErr");
+	if (pi.er == 8)
+		printf("illegalType");
+	if (pi.er == 9)
+		printf("semicolonExpected");
+	if (pi.er == 10)
+		printf("subroutineDeclarErr");
+	if (pi.er == 11)
+		printf("openParenExpected");
+	if (pi.er == 12)
+		printf("closeParenExpected");
+	if (pi.er == 13)
+		printf("closeBracketExpected");
+	if (pi.er == 14)
+		printf("equalExpected");
+	if (pi.er == 15)
+		printf("syntaxError");
+	printf("\n\n\n");
+	return 1;
+}
 #endif
