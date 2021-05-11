@@ -314,6 +314,7 @@ ParserInfo letStatement()
 	{
 		if (strcmp(pi.tk.lx, "[") != 0)
 			break;
+		printf("hi we shouldnt be here");
 		pi = expression();
 		if (pi.er != none)
 			return pi;
@@ -328,6 +329,7 @@ ParserInfo letStatement()
 		break;
 	}
 	pi.tk = GetNextToken();
+	printf("\nwe should be here and the token is %s", pi.tk.lx);
 	if (strcmp(pi.tk.lx, "=") == 0)
 		;
 	else
@@ -520,24 +522,27 @@ ParserInfo expressionList()
 	ParserInfo pi;
 	pi.er = none;
 	pi.tk = PeekNextToken();
+	printf("\nline 525 whats our token, its %s", pi.tk.lx);
 	if (strcmp(pi.tk.lx, "-") == 0 || strcmp(pi.tk.lx, "~") == 0 || pi.tk.tp == INT || pi.tk.tp == ID || pi.tk.tp == STRING || strcmp(pi.tk.lx, "true") == 0 || strcmp(pi.tk.lx, "false") == 0 || strcmp(pi.tk.lx, "null") == 0 || strcmp(pi.tk.lx, "this") == 0 || strcmp(pi.tk.lx, "(") == 0)
 	{
 		pi = expression();
 		if (pi.er != none)
 			return pi;
-		pi.tk = GetNextToken();
+		//pi.tk = GetNextToken();
+		printf("\nline 532 whats our token, its %s", pi.tk.lx);
 		pi.tk = PeekNextToken();
+		printf("\nline 534 whats our token, its %s", pi.tk.lx);
 		while (1)
 		{
 			if (strcmp(pi.tk.lx, ",") != 0)
 				break;
+			printf("\nreally hope we're not here");
 			pi.tk = GetNextToken();
 			pi = expression();
 			if (pi.er != none)
 				return pi;
 			pi.tk = PeekNextToken();
 		}
-		return pi;
 	}
 	else if (strcmp(pi.tk.lx, ")") == 0)
 		;
@@ -673,7 +678,10 @@ ParserInfo operand()
 	}
 	if (pi.tk.tp == ID)
 	{
+		printf("\ndid we at least get to ID?");
+		printf("\nline 682 token %s", pi.tk.lx);
 		pi.tk = PeekNextToken();
+		printf("\nline 684 token %s", pi.tk.lx);
 		while (1)
 		{
 			if (strcmp(pi.tk.lx, ".") != 0)
@@ -689,10 +697,13 @@ ParserInfo operand()
 			}
 			break;
 		}
+		printf("\nok are we at the choice of expression and expList?");
+		pi.tk = PeekNextToken();
 		while (1)
 		{
 			if (strcmp(pi.tk.lx, "[") != 0 && strcmp(pi.tk.lx, "(") != 0)
 				break;
+			printf("\noh did we find our ( ?");
 			pi.tk = GetNextToken();
 			if (strcmp(pi.tk.lx, "[") == 0)
 			{
@@ -711,10 +722,16 @@ ParserInfo operand()
 			}
 			else if (strcmp(pi.tk.lx, "(") == 0)
 			{
+				printf("\nshould be in expression list here");
+				printf("\nline 721 ok what token are we at? we are at : %s", pi.tk.lx);
+				printf("\nnow we call expression list");
 				pi = expressionList();
+				printf("\nok what token are we at? we are at : %s", pi.tk.lx);
+				printf("\nok line 723 error: %d", pi.er);
 				if (pi.er != none)
 					return pi;
 				pi.tk = GetNextToken();
+				printf("\nline 727 ok what token are we at? we are at : %s", pi.tk.lx);
 				if (strcmp(pi.tk.lx, ")") == 0)
 					;
 				else
