@@ -688,15 +688,14 @@ ParserInfo operand()
 	{
 		printf("\ntoken here??6 %s", pi.tk.lx);
 		pi.tk = GetNextToken();
-		Token tk = GetNextToken();
+		pi.tk = GetNextToken();
 		printf("\ntoken here??7 %s", pi.tk.lx);
 		printf("\ntoken here??8 %s", pi.tk.lx);
 		while (1)
 		{
-			if (strcmp(tk, ".") != 0)
+			if (strcmp(pi.tk.lx, ".") != 0)
 				break;
 			printf("\nare we here2 %s", pi.tk.lx);
-			pi.tk = GetNextToken();
 			pi.tk = GetNextToken();
 			printf("\nare we here3 %s", pi.tk.lx);
 			if (pi.tk.tp == ID)
@@ -709,7 +708,7 @@ ParserInfo operand()
 			break;
 		}
 		printf("\ntoken here??9 %s", pi.tk.lx);
-		tk = PeekNextToken();
+		pi.tk = PeekNextToken();
 		printf("\ntoken here??10 %s", pi.tk.lx);
 		while (1)
 		{
